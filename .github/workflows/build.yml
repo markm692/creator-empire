@@ -20,13 +20,16 @@ jobs:
           mkdir -p build
           mkdir -p ~/.config/godot
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
-          # Link export templates from the Docker image
           cp /root/.local/share/godot/export_templates/4.3.stable/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
-          ls ~/.local/share/godot/export_templates/4.3.stable/
+          # Install Java
+          apt-get update -qq && apt-get install -y -qq default-jdk >/dev/null 2>&1
+          JAVA_PATH=$(dirname $(dirname $(readlink -f $(which javac))))
+          echo "Java at: $JAVA_PATH"
           # Create debug keystore
           keytool -genkeypair -v -keystore /root/debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Debug,O=Debug,C=US" 2>/dev/null || true
-          # Editor settings
-          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "/usr/lib/android-sdk"\nexport/android/debug_keystore = "/root/debug.keystore"\nexport/android/debug_keystore_user = "androiddebugkey"\nexport/android/debug_keystore_pass = "android"\n' > ~/.config/godot/editor_settings-4.tres
+          # Editor settings with Java path
+          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "/usr/lib/android-sdk"\nexport/android/java_sdk_path = "%s"\nexport/android/debug_keystore = "/root/debug.keystore"\nexport/android/debug_keystore_user = "androiddebugkey"\nexport/android/debug_keystore_pass = "android"\n' "$JAVA_PATH" > ~/.config/godot/editor_settings-4.tres
+          cat ~/.config/godot/editor_settings-4.tres
 
       - name: Create export presets
         run: |
