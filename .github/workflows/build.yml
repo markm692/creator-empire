@@ -21,8 +21,10 @@ jobs:
           mkdir -p ~/.config/godot
           mkdir -p ~/.local/share/godot/export_templates/4.3.stable
           cp /root/.local/share/godot/export_templates/4.3.stable/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
-          # Install Java
+          # Install Java and update Android SDK
           apt-get update -qq && apt-get install -y -qq default-jdk >/dev/null 2>&1
+          # Install matching build-tools and platform
+          yes | /usr/lib/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=/usr/lib/android-sdk "build-tools;34.0.0" "platforms;android-34" 2>/dev/null || true
           JAVA_PATH=$(dirname $(dirname $(readlink -f $(which javac))))
           echo "Java at: $JAVA_PATH"
           # Create debug keystore
