@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7B2FBE"/>
+      <stop offset="100%" stop-color="#E040FB"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="128" height="128" rx="20" fill="url(#bg)"/>
+  <!-- Phone body -->
+  <rect x="36" y="18" width="56" height="92" rx="8" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="40" y="28" width="48" height="68" rx="4" fill="#1A1A2E"/>
+  <!-- Play button triangle -->
+  <polygon points="56,48 56,76 78,62" fill="#E040FB"/>
+  <!-- Heart badge -->
+  <circle cx="88" cy="28" r="14" fill="#FF1744"/>
+  <text x="88" y="33" text-anchor="middle" font-size="16" fill="white">❤</text>
+</svg>
