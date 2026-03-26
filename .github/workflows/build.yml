@@ -116,10 +116,16 @@ jobs:
           ls $ANDROID_HOME/build-tools/ 2>/dev/null || echo "no build-tools"
           ls $ANDROID_HOME/platforms/ 2>/dev/null || echo "no platforms"
 
+      - name: List export templates
+        run: |
+          echo "=== Templates ==="
+          find ~/.local/share/godot -name "*.apk" -o -name "android*" 2>/dev/null | head -20
+          ls ~/.local/share/godot/export_templates/ 2>/dev/null || echo "no templates dir"
+          ls ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || echo "no 4.3 templates"
+
       - name: Export APK
         run: |
-          godot --headless --export-debug "Android" build/creator-empire.apk 2>&1 || true
-          echo "Exit code: $?"
+          godot --headless --verbose --export-debug "Android" build/creator-empire.apk 2>&1 || true
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
