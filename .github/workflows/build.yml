@@ -65,6 +65,24 @@ jobs:
           EOF
           sed -i 's/^          //' export_presets.cfg
 
+      - name: Debug check
+        run: |
+          echo "=== Keystore ==="
+          ls -la /root/debug.keystore 2>/dev/null || echo "NO KEYSTORE"
+          keytool -list -keystore /root/debug.keystore -storepass android 2>&1 | head -5 || echo "KEYSTORE INVALID"
+          echo "=== Java ==="
+          java -version 2>&1
+          which jarsigner
+          echo "=== SDK ==="
+          ls /usr/lib/android-sdk/build-tools/ 2>/dev/null
+          ls /usr/lib/android-sdk/platforms/ 2>/dev/null
+          echo "=== Editor Settings ==="
+          cat ~/.config/godot/editor_settings-4.tres
+          echo "=== Export Presets ==="
+          cat export_presets.cfg
+          echo "=== Templates ==="
+          ls ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || echo "NO TEMPLATES"
+
       - name: Import
         run: godot --headless --import 2>&1 || true
 
