@@ -9,7 +9,7 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     container:
-      image: barichello/godot-ci:4.3
+      image: barichello/godot-ci:4.2.2
 
     steps:
       - name: Checkout
@@ -19,8 +19,8 @@ jobs:
         run: |
           mkdir -p build
           mkdir -p ~/.config/godot
-          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
-          cp /root/.local/share/godot/export_templates/4.3.stable/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
+          mkdir -p ~/.local/share/godot/export_templates/4.2.2.stable
+          cp /root/.local/share/godot/export_templates/4.2.2.stable/* ~/.local/share/godot/export_templates/4.2.2.stable/ 2>/dev/null || true
           # Install Java and update Android SDK
           apt-get update -qq && apt-get install -y -qq default-jdk >/dev/null 2>&1
           # Install matching build-tools and platform
@@ -87,7 +87,7 @@ jobs:
           echo "=== Export Presets ==="
           cat export_presets.cfg
           echo "=== Templates ==="
-          ls ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || echo "NO TEMPLATES"
+          ls ~/.local/share/godot/export_templates/4.2.2.stable/ 2>/dev/null || echo "NO TEMPLATES"
 
       - name: Import
         run: godot --headless --import 2>&1 || true
