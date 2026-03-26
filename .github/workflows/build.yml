@@ -106,9 +106,20 @@ jobs:
           mkdir -p build
           godot --headless --import 2>&1 || true
 
+      - name: Debug config
+        run: |
+          echo "=== Editor Settings ==="
+          cat ~/.config/godot/editor_settings-4.tres
+          echo "=== Export Presets ==="
+          cat export_presets.cfg
+          echo "=== Android SDK ==="
+          ls $ANDROID_HOME/build-tools/ 2>/dev/null || echo "no build-tools"
+          ls $ANDROID_HOME/platforms/ 2>/dev/null || echo "no platforms"
+
       - name: Export APK
         run: |
-          godot --headless --export-debug "Android" build/creator-empire.apk 2>&1
+          godot --headless --export-debug "Android" build/creator-empire.apk 2>&1 || true
+          echo "Exit code: $?"
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
