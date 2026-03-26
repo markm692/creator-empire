@@ -265,8 +265,8 @@ func get_followers_per_second() -> float:
 ## Tap -------------------------------------------------------------------
 
 func tap() -> float:
-	var base := biz_defs[0]["base_payout"]
-	var amount := base * clout_bonus * combo
+	var base: float = biz_defs[0]["base_payout"]
+	var amount: float = base * clout_bonus * combo
 	followers += amount
 	total_followers += amount
 	add_combo()
@@ -360,8 +360,8 @@ func _apply_offline_progress(elapsed: float) -> void:
 			continue
 		var payout := get_biz_payout(i)
 		var cycle_time := get_biz_time(i)
-		var cycles := floor(elapsed / cycle_time)
-		var earned := payout * cycles
+		var cycles: float = floor(elapsed / cycle_time)
+		var earned: float = payout * cycles
 		followers += earned
 		total_followers += earned
 	_check_unlocks()
