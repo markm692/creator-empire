@@ -3,57 +3,35 @@ name: Build Creator Empire APK
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Godot
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: 4.3.0
-          use-dotnet: false
-          include-templates: true
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Create debug keystore
+      - name: Setup
         run: |
-          mkdir -p ~/.android
-          keytool -genkey -v \
-            -keystore ~/.android/debug.keystore \
-            -storepass android \
-            -alias androiddebugkey \
-            -keypass android \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -dname "CN=Android Debug,O=Android,C=US"
-
-      - name: Configure Godot editor settings
-        run: |
+          mkdir -p build
           mkdir -p ~/.config/godot
-          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "%s"\nexport/android/java_sdk_path = "%s"\nexport/android/debug_keystore = "/home/runner/.android/debug.keystore"\nexport/android/debug_keystore_user = "androiddebugkey"\nexport/android/debug_keystore_pass = "android"\n' "$ANDROID_HOME" "$JAVA_HOME" > ~/.config/godot/editor_settings-4.tres
-          cat ~/.config/godot/editor_settings-4.tres
+          mkdir -p ~/.local/share/godot/export_templates/4.3.stable
+          # Link export templates from the Docker image
+          cp /root/.local/share/godot/export_templates/4.3.stable/* ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || true
+          ls ~/.local/share/godot/export_templates/4.3.stable/
+          # Create debug keystore
+          keytool -genkeypair -v -keystore /root/debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Debug,O=Debug,C=US" 2>/dev/null || true
+          # Editor settings
+          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "/usr/lib/android-sdk"\nexport/android/debug_keystore = "/root/debug.keystore"\nexport/android/debug_keystore_user = "androiddebugkey"\nexport/android/debug_keystore_pass = "android"\n' > ~/.config/godot/editor_settings-4.tres
 
       - name: Create export presets
         run: |
-          cat > export_presets.cfg <<'PRESETS'
+          cat > export_presets.cfg << 'EOF'
           [preset.0]
-
           name="Android"
           platform="Android"
           runnable=true
@@ -63,13 +41,7 @@ jobs:
           include_filter=""
           exclude_filter=""
           export_path="build/creator-empire.apk"
-          encryption_include_filters=""
-          encryption_exclude_filters=""
-          encrypt_pck=false
-          encrypt_directory=false
-
           [preset.0.options]
-
           custom_template/debug=""
           custom_template/release=""
           gradle_build/use_gradle_build=false
@@ -84,49 +56,18 @@ jobs:
           package/name="Creator Empire"
           package/signed=true
           package/classify_as_game=true
-          launcher_icons/main_192x192=""
-          launcher_icons/adaptive_foreground_432x432=""
-          launcher_icons/adaptive_background_432x432=""
           screen/immersive_mode=true
-          screen/support_small=true
-          screen/support_normal=true
-          screen/support_large=true
-          screen/support_xlarge=true
-          xr_features/xr_mode=0
-          permissions/internet=true
-          PRESETS
-          # Remove leading whitespace from heredoc
+          EOF
           sed -i 's/^          //' export_presets.cfg
 
-      - name: Import project
-        run: |
-          mkdir -p build
-          godot --headless --import 2>&1 || true
-
-      - name: Debug config
-        run: |
-          echo "=== Editor Settings ==="
-          cat ~/.config/godot/editor_settings-4.tres
-          echo "=== Export Presets ==="
-          cat export_presets.cfg
-          echo "=== Android SDK ==="
-          ls $ANDROID_HOME/build-tools/ 2>/dev/null || echo "no build-tools"
-          ls $ANDROID_HOME/platforms/ 2>/dev/null || echo "no platforms"
-
-      - name: List export templates
-        run: |
-          echo "=== Templates ==="
-          find ~/.local/share/godot -name "*.apk" -o -name "android*" 2>/dev/null | head -20
-          ls ~/.local/share/godot/export_templates/ 2>/dev/null || echo "no templates dir"
-          ls ~/.local/share/godot/export_templates/4.3.stable/ 2>/dev/null || echo "no 4.3 templates"
+      - name: Import
+        run: godot --headless --import 2>&1 || true
 
       - name: Export APK
-        run: |
-          godot --headless --verbose --export-debug "Android" build/creator-empire.apk 2>&1 || true
+        run: godot --headless --export-debug "Android" build/creator-empire.apk 2>&1
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: creator-empire-apk
           path: build/creator-empire.apk
-          if-no-files-found: error
